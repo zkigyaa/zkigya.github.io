@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Kelas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        .nav-tabs .nav-item .nav-link {
+            color: #495057;
+            font-weight: bold;
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            transition: border-color 0.3s;
+        }
+        .nav-tabs .nav-item .nav-link.active {
+            background-color: transparent;
+            color: #007bff;
+            border-color: #007bff;
+        }
+        .nav-tabs .nav-item .nav-link:hover {
+            border-color: #007bff;
+        }
+        .tab-content {
+            padding-top: 20px;
+        }
+        .list-group-item {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .list-group-item:hover {
+            background-color: #f0f0f0;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Absensi Kelas</h2>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="absensi-tab" data-toggle="tab" href="#absensi" role="tab" aria-controls="absensi" aria-selected="true">Absensi</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="statistik-tab" data-toggle="tab" href="#statistik" role="tab" aria-controls="statistik" aria-selected="false">Statistik</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="rangkuman-tab" data-toggle="tab" href="#rangkuman" role="tab" aria-controls="rangkuman" aria-selected="false">Rangkuman</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="absensi" role="tabpanel" aria-labelledby="absensi-tab">
+                <form id="absenForm" class="form-inline justify-content-center mb-3">
+                    <input type="text" id="namaSiswa" class="form-control mr-2" placeholder="Nama Siswa" required>
+                    <button type="submit" class="btn btn-primary">Absen</button>
+                </form>
+                <div id="absensiList">
+                    <h3>Daftar Absensi:</h3>
+                    <ul id="listAbsensi" class="list-group">
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="statistik" role="tabpanel" aria-labelledby="statistik-tab">
+                <div id="statistikContent">
+                    <h3>Statistik Absensi:</h3>
+                    <p>Total absensi: <span id="jumlahAbsensi">0</span></p>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="rangkuman" role="tabpanel" aria-labelledby="rangkuman-tab">
+                <div id="rangkumanContent">
+                    <h3>Rangkuman Absensi:</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama</th>
+                                <th>Jumlah Absen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableRangkumanBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let absensi = [];
+
+        function updateAbsensiList() {
+            let listElement = document.getElementById('listAbsensi');
+            listElement.innerHTML = '';
+
+            absensi.forEach(function(nama, index) {
+                let listItem = document.createElement('li');
+                listItem.textContent = `${index + 1}. ${nama}`;
+                listItem.classList.add('list-group-item');
+                listElement.appendChild(listItem);
+            });
+
+            updateStatistik();
+            updateRangkuman();
+        }
+
+        function updateStatistik() {
+            let jumlahAbsensi = absensi.length;
+            document.getElementById('jumlahAbsensi').textContent = jumlahAbsensi;
+        }
+
+        function updateRangkuman() {
+            let tableBody = document.getElementById('tableRangkumanBody');
+            tableBody.innerHTML = '';
+
+            let absensiCount = {};
+            absensi.forEach(function(nama) {
+                if (absensiCount[nama]) {
+                    absensiCount[nama]++;
+                } else {
+                    absensiCount[nama] = 1;
+                }
+            });
+
+            let index = 1;
+            for (let nama in absensiCount) {
+                let row = `<tr>
+                               <td>${index}</td>
+                               <td>${nama}</td>
+                               <td>${absensiCount[nama]}</td>
+                           </tr>`;
+                tableBody.innerHTML += row;
+                index++;
+            }
+        }
+
+        document.getElementById('absenForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let namaSiswa = document.getElementById('namaSiswa').value.trim();
+
+            if (namaSiswa !== '') {
+                absensi.push(namaSiswa);
+                updateAbsensiList();
+                document.getElementById('namaSiswa').value = '';
+            } else {
+                alert('Silakan masukkan nama siswa.');
+            }
+        });
+
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                let tabId = this.getAttribute('href').substring(1);
+                showTab(tabId);
+            });
+        });
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(function(tab) {
+                tab.classList.remove('show', 'active');
+            });
+
+            document.getElementById(tabId).classList.add('show', 'active');
+
+            if (tabId === 'statistik') {
+                updateStatistik();
+            } else if (tabId === 'rangkuman') {
+                updateRangkuman();
+            }
+        }
+
+        showTab('absensi');
+    </script>
+</body>
+</html>
